@@ -41,9 +41,9 @@ CHD1 is an ATP-dependent chromatin remodeling factor that slides nucleosomes to 
 ├── 05_aberrant_transcription/  # Antisense transcription analysis
 ├── 06_dosage_compensation/ # X/A ratio analysis
 ├── 07_additional/          # Traveling Ratio, GO enrichment
-├── figures/                # Publication-ready figures
+├── annotation/             # Gene BED files (dm6)
 ├── results/                # DESeq2 tables, GO results
-└── annotation/             # Gene BED files (dm6)
+└── figures/                # Publication-ready figures
 ```
 
 ## Pipeline overview
