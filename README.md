@@ -133,7 +133,7 @@ python aberrant_transcription.py
 cd ../06_dosage_compensation
 python dosage_compensation.py
 
-# 7. GO enrichment (requires internet)
+# 7. GO enrichment
 cd ../07_additional
 python go_enrichment.py
 ```
