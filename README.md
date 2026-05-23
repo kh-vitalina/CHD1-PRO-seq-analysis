@@ -71,7 +71,6 @@ CHD1 is an ATP-dependent chromatin remodeling factor that slides nucleosomes to 
 | `05_aberrant_transcription/aberrant_transcription.py` | BAM files | AS ratio per gene | pysam, sense/antisense counts |
 | `06_dosage_compensation/dosage_compensation.py` | BAM files | X/A ratio, paired barplot | RPK, Mann-Whitney U |
 | `07_additional/go_enrichment.py` | DESeq2 CSV | GO dot plots, barplots | g:Profiler REST API |
-| `07_additional/traveling_ratio.py` | BAM files | TR violin+box plot | Alternative pausing metric |
 
 ## Tool versions
 
