@@ -137,7 +137,7 @@ python scripts/09_go_enrichment.py
 
 | Aberrant transcription | Dosage compensation |
 |----------------------|-------------------|
-| ![](figures/aberrant_transcription.png) | ![](figures/DC_figure.png) |
+| ![](figures/AT_figure.png) | ![](figures/DC_figure.png) |
 
 ## References
 
