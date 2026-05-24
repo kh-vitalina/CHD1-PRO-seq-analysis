@@ -1,0 +1,31 @@
+name: proseq
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - bowtie2
+  - bowtie
+  - samtools
+  - bedtools
+  - deeptools
+  - umi_tools
+  - cutadapt
+  - sra-tools
+  - fastqc
+  - ucsc-bedgraphtobigwig
+  - r-base=4.3
+  - bioconductor-deseq2
+  - bioconductor-genomicalignments
+  - bioconductor-rsamtools
+  - r-pheatmap
+  - pip
+  - pip:
+    - pysam
+    - pandas
+    - numpy
+    - matplotlib
+    - scipy
+    - seaborn
+    - requests
