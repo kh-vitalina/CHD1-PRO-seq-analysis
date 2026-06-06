@@ -38,7 +38,7 @@ CHD1 is an ATP-dependent chromatin remodeling factor that slides nucleosomes to 
 ├── environment.yaml
 ├── scripts/
 │   ├── 01_pipeline_preprocessing.sh    # FASTQ → BAM → BigWig
-│   ├── 02_annotation.sh                # refGene → BED
+│   ├── 02_prepare_annotation.sh        # refGene → BED
 │   ├── 03_plot_metagene.py             # Combined metagene profile
 │   ├── 04_pausing_index.py             # PI calculation + figures
 │   ├── 05_deseq2_analysis.R            # Differential transcription

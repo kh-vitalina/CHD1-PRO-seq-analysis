@@ -56,30 +56,29 @@ def load_genes(bed_file, strand):
 
 def count_reads_rpk(bam_file, genes):
     """Count sense-strand reads, normalize by gene length (RPK)."""
-    bam = pysam.AlignmentFile(bam_file, "rb")
-    results = []
-    for g in genes:
-        chrom, start, end = g["chrom"], g["start"], g["end"]
-        strand, length = g["strand"], g["length"]
-        count = 0
-        for read in bam.fetch(chrom, start, end):
-            if strand == "+" and read.is_reverse:
-                count += 1
-            elif strand == "-" and not read.is_reverse:
-                count += 1
-        if count >= MIN_READS:
-            results.append(
-                {
-                    "gene": g["name"],
-                    "chrom": chrom,
-                    "strand": strand,
-                    "length": length,
-                    "reads": count,
-                    "rpk": count / (length / 1000),
-                }
-            )
-    bam.close()
-    return pd.DataFrame(results)
+    with pysam.AlignmentFile(bam_file, "rb") as bam:
+        results = []
+        for g in genes:
+            chrom, start, end = g["chrom"], g["start"], g["end"]
+            strand, length = g["strand"], g["length"]
+            count = 0
+            for read in bam.fetch(chrom, start, end):
+                if strand == "+" and read.is_reverse:
+                    count += 1
+                elif strand == "-" and not read.is_reverse:
+                    count += 1
+            if count >= MIN_READS:
+                results.append(
+                    {
+                        "gene": g["name"],
+                        "chrom": chrom,
+                        "strand": strand,
+                        "length": length,
+                        "reads": count,
+                        "rpk": count / (length / 1000),
+                    }
+                )
+        return pd.DataFrame(results)
 
 
 def merge_replicates(df1, df2):

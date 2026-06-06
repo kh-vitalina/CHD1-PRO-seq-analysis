@@ -55,45 +55,44 @@ def load_genes(bed_file, strand):
 
 def count_sense_antisense(bam_file, genes):
     # PRO-seq is reverse-stranded: for + genes, reverse reads = sense
-    bam = pysam.AlignmentFile(bam_file, "rb")
-    results = []
-    for g in genes:
-        chrom, strand = g["chrom"], g["strand"]
-        if strand == "+":
-            body_start = g["start"] + BODY_OFFSET
-            body_end = g["end"]
-        else:
-            body_start = g["start"]
-            body_end = g["end"] - BODY_OFFSET
-        if body_end <= body_start:
-            continue
-
-        sense, antisense = 0, 0
-        for read in bam.fetch(chrom, body_start, body_end):
+    with pysam.AlignmentFile(bam_file, "rb") as bam:
+        results = []
+        for g in genes:
+            chrom, strand = g["chrom"], g["strand"]
             if strand == "+":
-                if read.is_reverse:
-                    sense += 1
-                else:
-                    antisense += 1
+                body_start = g["start"] + BODY_OFFSET
+                body_end = g["end"]
             else:
-                if not read.is_reverse:
-                    sense += 1
-                else:
-                    antisense += 1
+                body_start = g["start"]
+                body_end = g["end"] - BODY_OFFSET
+            if body_end <= body_start:
+                continue
 
-        if sense >= MIN_SENSE_READS:
-            results.append(
-                {
-                    "gene": g["name"],
-                    "chrom": chrom,
-                    "strand": strand,
-                    "sense": sense,
-                    "antisense": antisense,
-                    "antisense_ratio": antisense / sense,
-                }
-            )
-    bam.close()
-    return pd.DataFrame(results)
+            sense, antisense = 0, 0
+            for read in bam.fetch(chrom, body_start, body_end):
+                if strand == "+":
+                    if read.is_reverse:
+                        sense += 1
+                    else:
+                        antisense += 1
+                else:
+                    if not read.is_reverse:
+                        sense += 1
+                    else:
+                        antisense += 1
+
+            if sense >= MIN_SENSE_READS:
+                results.append(
+                    {
+                        "gene": g["name"],
+                        "chrom": chrom,
+                        "strand": strand,
+                        "sense": sense,
+                        "antisense": antisense,
+                        "antisense_ratio": antisense / sense,
+                    }
+                )
+        return pd.DataFrame(results)
 
 
 def merge_replicates(df1, df2, label):

@@ -39,7 +39,7 @@ SAMPLES_ORDER = [
 
 BED_PLUS = "annotation/genes_dm6_plus.bed"
 BED_MINUS = "annotation/genes_dm6_minus.bed"
-OUT = "deseq2_results"
+OUT = "figures"
 os.makedirs(OUT, exist_ok=True)
 
 
@@ -65,7 +65,7 @@ def load_genes(bed_file, strand):
 
 
 # load DESeq2 results
-deseq2_file = "deseq2_results/DESeq2_Chd1_depletion.csv"
+deseq2_file = "results/DESeq2_Chd1_depletion.csv"
 print("Loading DESeq2 results...")
 if not os.path.exists(deseq2_file):
     print(f"ERROR: {deseq2_file} not found, run deseq2_analysis.R first")
@@ -177,41 +177,21 @@ ax.text(
 # label top genes
 top_label = deseq2.copy()
 top_label["nlp"] = -np.log10(top_label["padj"].clip(lower=1e-300))
-top_label = top_label.nlargest(15, "nlp")
+top_label = top_label.nlargest(10, "nlp")
 
 if HAS_ADJUSTTEXT:
-    texts = []
-    for _, row in top_label.iterrows():
-        y_val = min(
-            -np.log10(max(row["padj"], 1e-300)),
-            ax.get_ylim()[1] - 5 if ax.get_ylim()[1] > 10 else 300,
-        )
-        texts.append(
-            ax.annotate(
-                row[gene_col],
-                (row["log2FoldChange"], y_val),
-                fontsize=6.75,
-                color="#333333",
-                ha="center",
-                va="bottom",
-                xytext=(0, 3),
-                textcoords="offset points",
-            )
-        )
-    adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="#999999", lw=0.5))
+    texts = [
+        ax.text(row["log2FoldChange"], row["nlp"], row[gene_col],
+                fontsize=7, color="#333333")
+        for _, row in top_label.iterrows()
+    ]
+    adjust_text(texts, ax=ax, only_move={"text": "xy"},
+                expand_text=(1.2, 1.4), force_text=(0.3, 0.5))
 else:
     for _, row in top_label.iterrows():
-        y_val = min(-np.log10(max(row["padj"], 1e-300)), 280)
-        ax.annotate(
-            row[gene_col],
-            (row["log2FoldChange"], y_val),
-            fontsize=5,
-            color="#333333",
-            ha="center",
-            va="bottom",
-            xytext=(0, 3),
-            textcoords="offset points",
-        )
+        ax.annotate(row[gene_col], (row["log2FoldChange"], row["nlp"]),
+                    fontsize=6, color="#333333", ha="center", va="bottom",
+                    xytext=(0, 3), textcoords="offset points")
 
 ax.set_xlabel(r"$\log_2$(Fold Change)")
 ax.set_ylabel(r"$-\log_{10}$(adjusted p-value)")
@@ -251,18 +231,17 @@ print("  Counting reads...")
 count_matrix = {}
 for sample_name, bam_path in SAMPLES_ORDER:
     print(f"    {sample_name}...")
-    bam = pysam.AlignmentFile(bam_path, "rb")
     counts = {}
-    for gname in selected:
-        g = gene_dict[gname]
-        count = 0
-        for read in bam.fetch(g["chrom"], g["start"], g["end"]):
-            if g["strand"] == "+" and read.is_reverse:
-                count += 1
-            elif g["strand"] == "-" and not read.is_reverse:
-                count += 1
-        counts[gname] = count
-    bam.close()
+    with pysam.AlignmentFile(bam_path, "rb") as bam:
+        for gname in selected:
+            g = gene_dict[gname]
+            count = 0
+            for read in bam.fetch(g["chrom"], g["start"], g["end"]):
+                if g["strand"] == "+" and read.is_reverse:
+                    count += 1
+                elif g["strand"] == "-" and not read.is_reverse:
+                    count += 1
+            counts[gname] = count
     count_matrix[sample_name] = counts
 
 count_df = pd.DataFrame(count_matrix)

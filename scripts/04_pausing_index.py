@@ -60,47 +60,46 @@ def calc_pi(bam_file, genes):
     PI = (reads in promoter / promoter length in kb) / (reads in body / body length in kb)
     PRO-seq is reverse-stranded: for + genes, reverse reads are sense.
     """
-    bam = pysam.AlignmentFile(bam_file, "rb")
-    results = []
-    for g in genes:
-        chrom, start, end = g["chrom"], g["start"], g["end"]
-        strand = g["strand"]
+    with pysam.AlignmentFile(bam_file, "rb") as bam:
+        results = []
+        for g in genes:
+            chrom, start, end = g["chrom"], g["start"], g["end"]
+            strand = g["strand"]
 
-        if strand == "+":
-            tss = start
-            prom = sum(
-                1 for r in bam.fetch(chrom, tss, tss + PROMOTER_WINDOW) if r.is_reverse
-            )
-            body = sum(
-                1 for r in bam.fetch(chrom, tss + PROMOTER_WINDOW, end) if r.is_reverse
-            )
-        else:
-            tss = end
-            prom = sum(
-                1
-                for r in bam.fetch(chrom, tss - PROMOTER_WINDOW, tss)
-                if not r.is_reverse
-            )
-            body = sum(
-                1
-                for r in bam.fetch(chrom, start, tss - PROMOTER_WINDOW)
-                if not r.is_reverse
-            )
+            if strand == "+":
+                tss = start
+                prom = sum(
+                    1 for r in bam.fetch(chrom, tss, tss + PROMOTER_WINDOW) if r.is_reverse
+                )
+                body = sum(
+                    1 for r in bam.fetch(chrom, tss + PROMOTER_WINDOW, end) if r.is_reverse
+                )
+            else:
+                tss = end
+                prom = sum(
+                    1
+                    for r in bam.fetch(chrom, tss - PROMOTER_WINDOW, tss)
+                    if not r.is_reverse
+                )
+                body = sum(
+                    1
+                    for r in bam.fetch(chrom, start, tss - PROMOTER_WINDOW)
+                    if not r.is_reverse
+                )
 
-        body_len = abs(end - start - PROMOTER_WINDOW)
-        if body_len > 0 and prom >= MIN_READS and body >= MIN_READS:
-            prom_density = prom / (PROMOTER_WINDOW / 1000)
-            body_density = body / (body_len / 1000)
-            results.append(
-                {
-                    "gene": g["name"],
-                    "chrom": chrom,
-                    "strand": strand,
-                    "PI": prom_density / body_density,
-                }
-            )
-    bam.close()
-    return pd.DataFrame(results)
+            body_len = abs(end - start - PROMOTER_WINDOW)
+            if body_len > 0 and prom >= MIN_READS and body >= MIN_READS:
+                prom_density = prom / (PROMOTER_WINDOW / 1000)
+                body_density = body / (body_len / 1000)
+                results.append(
+                    {
+                        "gene": g["name"],
+                        "chrom": chrom,
+                        "strand": strand,
+                        "PI": prom_density / body_density,
+                    }
+                )
+        return pd.DataFrame(results)
 
 
 def merge_replicates(df1, df2):
