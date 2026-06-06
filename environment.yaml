@@ -6,7 +6,6 @@ channels:
 dependencies:
   - python=3.10
   - bowtie2
-  - bowtie
   - samtools
   - bedtools
   - deeptools
